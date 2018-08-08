@@ -1,25 +1,93 @@
+local controllers = require "controllers"
 local window = {}
 
 window.lookingAt = {0,0}
 window.panSpeed = 2
 window.zoomRatio = 0 --how many pixels a grid "Block" should be
 defaultZoomRatio = 0
-window.maxZoomRatio = 100
+window.maxZoomRatio = 40
 window.zoomSpeed = .1
+window.focusedObject = 1
+window.freeMode = true
 local gridBounds = {0,0}
 local cameraMoveSpeed = zoomRatio
 
-function window.moveCamera(left, right, up, down, zoomin, zoomout)
-    if window.lookingAt[1] == math.huge then
-        window.lookingAt[1] = 0
-        window.lookingAt[2] = 0
+function window.setControls()
+    controllers.addControl("panUp", {"i"}, false, true)
+    controllers.addControl("panLeft", {"j"}, false, true)
+    controllers.addControl("panDown", {"k"}, false, true)
+    controllers.addControl("panRight", {"l"}, false, true)
+
+    controllers.addControl("zoomIn", {"i"}, false, true)
+    controllers.addControl("zoomOut", {"j"}, false, true)
+
+    controllers.addControl("nextFocusedObject", {"]"}, false, false)
+    controllers.addControl("prevFocusedObject", {"["}, false, false)
+    controllers.addControl("freeCamera", {"\\"}, false, false)
+end
+
+function window.updateCamera(objects)
+    if controllers.checkControl("prevFocusedObject") then
+        if window.freeMode then
+            window.zoomRatio = window.maxZoomRatio
+        end
+        window.freeMode = false
+        window.focusedObject = window.focusedObject - 1
+        if window.focusedObject <= 0 then
+            window.focusedObject = #objects
+        end
+    elseif controllers.checkControl("nextFocusedObject") then
+        if window.freeMode then
+            window.zoomRatio = window.maxZoomRatio
+        end
+        window.freeMode = false
+        window.focusedObject = window.focusedObject + 1
+        if window.focusedObject > #objects then
+            window.focusedObject = 1
+        end
+    elseif love.keyboard.isDown("\\") then
+        window.freeMode = true
     end
 
+
+    zoomCamera()
+    if window.freeMode then
+        panCamera()
+    else
+        trackObject(objects[window.focusedObject])
+    end
+
+    window.keepViewInBounds()
+end
+
+function trackObject(object)
+    local trackX = math.huge
+    local trackY = math.huge
+    if object.shapeType == "Circle" then
+        x = object.body:getX()
+        y = object.body:getY()
+        trackX = x * (window.zoomRatio/defaultZoomRatio)
+        trackY = y * (window.zoomRatio/defaultZoomRatio)
+    elseif object.shapeType == "Polygon" then
+        x = object.body:getX()
+        y = object.body:getY()
+        trackX = x * (window.zoomRatio/defaultZoomRatio)
+        trackY = y * (window.zoomRatio/defaultZoomRatio)
+    else
+        window.freeMode = true
+    end
+    if(trackX ~= math.huge and trackY ~= math.huge) then
+        window.lookingAt[1] = trackX - (love.graphics.getWidth() / 2)
+        window.lookingAt[2] = trackY - (love.graphics.getHeight() / 2)
+    end
+end
+
+function zoomCamera()
     oldZoom = window.zoomRatio
-    if zoomin then
+    if love.keyboard.isDown(".") then
         window.zoomRatio = window.zoomRatio - window.zoomSpeed
     end
-    if zoomout then
+    if love.keyboard.isDown("/") then
         window.zoomRatio = window.zoomRatio + window.zoomSpeed
     end
 
@@ -27,32 +95,32 @@ function window.moveCamera(left, right, up, down, zoomin, zoomout)
     if window.zoomRatio <= window.minZoomRatio then
         window.zoomRatio = window.minZoomRatio
     end
-    if window.zoomRatio > 40 then
-        window.zoomRatio = 40
+    if window.zoomRatio > window.maxZoomRatio then
+        window.zoomRatio = window.maxZoomRatio
     end
-    if oldZoom ~= window.zoomRatio then
+    if oldZoom ~= window.zoomRatio and window.freeMode then
         centerZoom(oldZoom)
     end
+end
 
+function panCamera()
     dx = 0
     dy = 0
-    if left then
+    if love.keyboard.isDown("j") then
         dx = dx - window.panSpeed
     end
-    if right then
+    if love.keyboard.isDown("l") then
         dx = dx + window.panSpeed
     end
-    if up then
+    if love.keyboard.isDown("i") then
         dy = dy - window.panSpeed
     end
-    if down then
+    if love.keyboard.isDown("k") then
         dy = dy + window.panSpeed
     end
 
     window.lookingAt[1] = window.lookingAt[1] + dx
     window.lookingAt[2] = window.lookingAt[2] + dy
-
-    window.keepViewInBounds()
 end
 
 --[[

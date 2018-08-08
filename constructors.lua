@@ -1,6 +1,7 @@
 local d = require "drawer"
 local b = require "behaviors"
 local h = require "helpers"
+local controls = require "controllers"
 
 local constructors = {}
 
@@ -13,6 +14,7 @@ function constructors.newEnemyBasic(x, y)
   enemy.body = love.physics.newBody(world, x, y, 'dynamic')
   enemy.shape = love.physics.newRectangleShape(0, 0, 20, 20)
   enemy.fixture = love.physics.newFixture(enemy.body, enemy.shape, 2)
+  enemy.shapeType = "Polygon"
   enemy.fixture:setRestitution(0.1)
   enemy.fixture:setUserData(enemy)
   enemy.body:setLinearDamping(0.4)
@@ -24,10 +26,15 @@ function constructors.newEnemyBasic(x, y)
 end
 
 function constructors.newPlayer(x, y)
+controllers.addControl("playerUp", {"up","w"}, false, true)
+controllers.addControl("playerLeft", {"left","a"}, false, true)
+controllers.addControl("playerDown", {"down","s"}, false, true)
+controllers.addControl("playerRight", {"right","d"}, false, true)
   local player = {}
   player.color = {1, 0, 0}
   player.body = love.physics.newBody(world, x, y, 'dynamic')
   player.shape = love.physics.newCircleShape(15)
+  player.shapeType = "Circle"
   player.fixture = love.physics.newFixture(player.body, player.shape, 2.5)
   player.fixture:setRestitution(0.1)
   player.fixture:setUserData(player)
@@ -35,14 +42,14 @@ function constructors.newPlayer(x, y)
   player.behaviors = {
     function(self)
       -- TODO make this directional
-      if love.keyboard.isDown("right", "d") then
+      if controls.checkControl("playerRight") then
         self.body:applyForce(1500, 0)
-      elseif love.keyboard.isDown("left", "a") then
+    elseif controls.checkControl("playerLeft") then
         self.body:applyForce(-1500, 0)
       end
-      if love.keyboard.isDown("up", "w") then
+      if controls.checkControl("playerUp") then
         self.body:applyForce(0, -1500)
-      elseif love.keyboard.isDown("down", "s") then
+    elseif controls.checkControl("playerDown") then
         self.body:applyForce(0, 1500)
       end
     end

@@ -1,5 +1,6 @@
 local g = require "generator"
 local c = require "constructors"
+local controllers = require "controllers"
 local w = require "window"
 
 SQUARESIZE = 12.8
@@ -30,14 +31,17 @@ function love.load(arg)
   love.graphics.setBackgroundColor(255, 255, 255)
   board = g.generate(boardWidth, boardHeight, 0.35, 100, 'alive')
   fillWorld(board)
+  controllers.addControl("resetGame", {"r"}, true, true)
   w.setBounds(boardWidth, boardHeight, SQUARESIZE)
+  w.setControls()
 end
 
 function love.update(dt)
+    controllers.updateControls(dt)
 	local total = dt
-  updatesPerFrame = 0
-  local tdt
-  local completedStep -- this is true when a full step has been completed
+    updatesPerFrame = 0
+    local tdt
+    local completedStep -- this is true when a full step has been completed
 	while total > MINDT do
     completedStep = false
     if rdt ~= 0 then
@@ -62,13 +66,8 @@ function love.update(dt)
     world:update(tdt)
     updatesPerFrame = updatesPerFrame + 1
 	end
-    w.moveCamera(love.keyboard.isDown("j"),
-                love.keyboard.isDown("l"),
-                love.keyboard.isDown("i"),
-                love.keyboard.isDown("k"),
-                love.keyboard.isDown("."),
-                love.keyboard.isDown("/"))
-    if(love.keyboard.isDown("r")) then --Regenerate the grid
+    w.updateCamera(objects)
+    if controllers.checkControl("resetGame") then --Regenerate the grid
         resetGame()
     end
 
