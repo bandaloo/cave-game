@@ -28,6 +28,11 @@ function helpers.scaledNormalToPointPos(x1, y1, x2, y2, scalar)
   return x1 + x * scalar, y1 + y * scalar
 end
 
+
+function worldPointsToScreenPoints(x1, y1, x2, y2, zoom)
+    return x1 * zoom, y1 * zoom, x2 * zoom, y2 * zoom
+end
+
 function helpers.combine(...)
   local combined = {}
   for i, itable in ipairs({...}) do

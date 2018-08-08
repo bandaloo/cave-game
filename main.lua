@@ -1,12 +1,12 @@
 local g = require "generator"
 local c = require "constructors"
+local w = require "window"
 
-
-SQUARESIZE = 32
+SQUARESIZE = 12.8
 MINDT = 0.001
 TIMESTEP = 1 / 120
-local boardWidth = 40
-local boardHeight = 22
+local boardWidth = 100
+local boardHeight = 56
 
 local edt = 0 -- extra delta time, for preventing very small timestep
 local rdt = 0 -- remainder delta time, for keeping a constant time step
@@ -21,16 +21,16 @@ objects = {}
 player = c.newPlayer(100, 100)
 nearestPlayer = player
 enemy = c.newEnemyBasic(200, 200)
+blocks = {}
 
 table.insert(objects, enemy)
 table.insert(objects, player)
 
 function love.load(arg)
   love.graphics.setBackgroundColor(255, 255, 255)
-  cornerX = (love.graphics.getWidth() - boardWidth * SQUARESIZE) / 2
-  cornerY = (love.graphics.getHeight() - boardHeight * SQUARESIZE) / 2
   board = g.generate(boardWidth, boardHeight, 0.35, 100, 'alive')
   fillWorld(board)
+  w.setBounds(boardWidth, boardHeight, SQUARESIZE)
 end
 
 function love.update(dt)
@@ -62,8 +62,33 @@ function love.update(dt)
     world:update(tdt)
     updatesPerFrame = updatesPerFrame + 1
 	end
+    w.moveCamera(love.keyboard.isDown("j"),
+                love.keyboard.isDown("l"),
+                love.keyboard.isDown("i"),
+                love.keyboard.isDown("k"),
+                love.keyboard.isDown("."),
+                love.keyboard.isDown("/"))
+    if(love.keyboard.isDown("r")) then --Regenerate the grid
+        resetGame()
+    end
+
   edt = total
   rdt = TIMESTEP - tdt
+end
+
+function resetGame()
+    world = love.physics.newWorld(0, 0, false)
+    objects = {}
+    player = c.newPlayer(100, 100)
+    nearestPlayer = player
+    enemy = c.newEnemyBasic(200, 200)
+    blocks = {}
+
+    table.insert(objects, enemy)
+    table.insert(objects, player)
+
+    board = g.generate(boardWidth, boardHeight, 0.35, 100, 'alive')
+    fillWorld(board)
 end
 
 function love.draw(dt)
@@ -79,7 +104,9 @@ function drawBoard(board)
   for i = 0, boardWidth - 1 do
     for j = 0, boardHeight - 1 do
       if board[i][j] == 1 then
-        love.graphics.rectangle('fill', i * SQUARESIZE + cornerX - 4, j * SQUARESIZE + cornerY - 4, SQUARESIZE + 8, SQUARESIZE + 8)
+        drawX, drawY = w.boardToWorldCoordinates(i, j)
+        love.graphics.rectangle('fill', drawX - 4, drawY - 4,
+                                w.zoomRatio + 8, w.zoomRatio + 8)
       end
     end
   end
@@ -87,7 +114,9 @@ function drawBoard(board)
   for i = 0, boardWidth - 1 do
     for j = 0, boardHeight - 1 do
       if board[i][j] == 1 then
-        love.graphics.rectangle('fill', i * SQUARESIZE + cornerX, j * SQUARESIZE + cornerY, SQUARESIZE, SQUARESIZE)
+        drawX, drawY = w.boardToWorldCoordinates(i, j)
+        love.graphics.rectangle('fill', drawX, drawY,
+                                w.zoomRatio, w.zoomRatio)
       end
     end
   end
@@ -98,9 +127,10 @@ function fillWorld(board)
     for j = 0, boardHeight - 1 do
       if board[i][j] == 1 then
         local block = {}
-        block.body = love.physics.newBody(world, i * SQUARESIZE + cornerX + SQUARESIZE / 2, j * SQUARESIZE + cornerY + SQUARESIZE / 2)
+        block.body = love.physics.newBody(world, i * SQUARESIZE + SQUARESIZE / 2, j * SQUARESIZE + SQUARESIZE / 2)
         block.shape = love.physics.newRectangleShape(0, 0, SQUARESIZE, SQUARESIZE)
         block.fixture = love.physics.newFixture(block.body, block.shape);
+        table.insert(blocks, block)
       end
     end
   end

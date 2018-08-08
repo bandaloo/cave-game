@@ -1,19 +1,22 @@
+local w = require "window"
 local drawer = {}
 
 function drawer.outlinedPoly(verts, width, color)
+  scaledVerts = w.scalePolygon(verts)
   love.graphics.setColor(unpack(color))
-  love.graphics.polygon('fill', verts)
+  love.graphics.polygon('fill', scaledVerts)
   love.graphics.setColor(0, 0, 0)
   love.graphics.setLineWidth(width)
-  love.graphics.polygon('line', verts)
+  love.graphics.polygon('line', scaledVerts)
 end
 
 function drawer.outlinedcircle(x, y, radius, width, color)
+  sx, sy, sr = w.scaleCircle(x, y, radius)
   love.graphics.setColor(unpack(color))
-  love.graphics.circle('fill', x, y, radius)
+  love.graphics.circle('fill', sx, sy, sr)
   love.graphics.setColor(0, 0, 0)
   love.graphics.setLineWidth(width)
-  love.graphics.circle('line', x, y, radius)
+  love.graphics.circle('line', sx, sy, sr)
 end
 
 
