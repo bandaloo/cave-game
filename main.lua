@@ -105,8 +105,10 @@ function drawBoard(board)
     for j = 0, boardHeight - 1 do
       if board[i][j] == 1 then
         drawX, drawY = w.boardToWorldCoordinates(i, j)
-        love.graphics.rectangle('fill', drawX - 4, drawY - 4,
-                                w.zoomRatio + 8, w.zoomRatio + 8)
+        love.graphics.rectangle('fill', drawX - 4 * w.zoomRatio/defaultZoomRatio,
+                                drawY - 4 * w.zoomRatio/defaultZoomRatio,
+                                w.zoomRatio + 8 * w.zoomRatio/defaultZoomRatio,
+                                w.zoomRatio + 8 * w.zoomRatio/defaultZoomRatio)
       end
     end
   end
