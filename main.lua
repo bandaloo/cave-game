@@ -3,8 +3,13 @@ local c = require "constructors"
 
 
 SQUARESIZE = 32
+MINDT = 0.001
+TIMESTEP = 1 / 120
 local boardWidth = 40
 local boardHeight = 22
+
+local edt = 0 -- extra delta time, for preventing very small timestep
+local rdt = 0 -- remainder delta time, for keeping a constant time step
 
 -- temporary seed for testing
 love.math.setRandomSeed(0)
@@ -29,15 +34,36 @@ function love.load(arg)
 end
 
 function love.update(dt)
-  for key, object in pairs(objects) do
-    currentKey = key -- check if i actually need this
-    if object.behaviors ~= nil then
-      for i, func in ipairs(object.behaviors) do
-        func(object)
+	local total = dt
+  updatesPerFrame = 0
+  local tdt
+  local completedStep -- this is true when a full step has been completed
+	while total > MINDT do
+    completedStep = false
+    if rdt ~= 0 then
+      tdt = rdt
+      rdt = 0
+      completedStep = true
+    else
+      tdt = math.min(TIMESTEP, total) + edt
+      edt = 0
+      if tdt == TIMESTEP then
+        completedStep = true
       end
     end
-  end
-  world:update(dt)
+		total = total - tdt
+    for key, object in pairs(objects) do
+      if object.behaviors ~= nil then
+        for i, func in ipairs(object.behaviors) do
+          func(object)
+        end
+      end
+    end
+    world:update(tdt)
+    updatesPerFrame = updatesPerFrame + 1
+	end
+  edt = total
+  rdt = TIMESTEP - tdt
 end
 
 function love.draw(dt)
@@ -45,6 +71,7 @@ function love.draw(dt)
   for key, object in pairs(objects) do
     object:draw()
   end
+  love.graphics.printf(updatesPerFrame, 0, 0, 200, 'left')
 end
 
 function drawBoard(board)

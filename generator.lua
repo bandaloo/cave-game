@@ -4,7 +4,7 @@ local DIE = 0
 local STAY = 1
 local BIRTH = 2
 
-local edgemode
+local edgeMode
 
 local board1 = {}
 local board2 = {}
@@ -26,13 +26,13 @@ function makeBoard(board)
 end
 
 function checkBoard(x, y, board)
-  if edgemode == 'wrap' then
+  if edgeMode == 'wrap' then
     x = x % boardWidth
     y = y % boardHeight
   end
 
   if x < 0 or x > boardWidth - 1 or y < 0 or y > boardHeight - 1 then
-    if edgemode == 'alive' then
+    if edgeMode == 'alive' then
       return 1
     else
       return 0
@@ -50,17 +50,17 @@ function countNeighbors(x, y, board)
   return count
 end
 
-function stepBoard(oldboard, newboard)
+function stepBoard(oldBoard, newBoard)
   for i = 0, boardWidth - 1 do
     for j = 0, boardHeight - 1 do
-      count = countNeighbors(i, j, oldboard)
+      count = countNeighbors(i, j, oldBoard)
       result = rules[count + 1]
       if result == BIRTH then
-        newboard[i][j] = 1
+        newBoard[i][j] = 1
       elseif result == DIE then
-        newboard[i][j] = 0
+        newBoard[i][j] = 0
       else
-        newboard[i][j] = oldboard[i][j]
+        newBoard[i][j] = oldBoard[i][j]
       end
     end
   end
@@ -81,21 +81,21 @@ function generator.generate(width, height, threshhold, generations, mode)
   boardtick = true
   boardWidth = width
   boardHeight = height
-  edgemode = mode
+  edgeMode = mode
   makeBoard(board1)
   makeBoard(board2)
   randomizeBoard(threshhold, board1)
   for i = 1, generations do
     if boardtick then
       stepBoard(board1, board2)
-      newboard = board2
+      newBoard = board2
     else
       stepBoard(board2, board1)
-      newboard = board1
+      newBoard = board1
     end
     boardtick = not boardtick
   end
-  return newboard
+  return newBoard
 end
 
 return generator
