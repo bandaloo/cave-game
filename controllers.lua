@@ -28,14 +28,34 @@ function controllers.setupControls()
     --Debug controls
     controllers.addKeyControl("resetGame", {"r"}, true, true)
     controllers.addKeyControl("removeWallCollision", {"v"}, false, false)
+
+    controllers.addMouseControl("click", {1}, false, true)
 end
 
-function controllers.addKeyControl(key, letters, buffered, holdable)
+function controllers.addKeyControl(key, inputs, buffered, holdable)
     control = {}
-    control.letters = letters
+    control.inputs = inputs
     control.buffered = buffered
     control.holdable = holdable
     control.active = false
+    control.inputFunction = love.keyboard.isDown
+    if buffered then
+        control.timeElapsed = BUFFERTIME
+    end
+    if not holdable then
+        control.released = true
+    end
+    controls[key] = control
+end
+
+function controllers.addMouseControl(key, inputs, buffered, holdable)
+    control = {}
+    control.inputs = inputs
+    control.buffered = buffered
+    control.holdable = holdable
+    control.active = false
+    control.inputFunction = love.mouse.isDown
+    control.position = {0,0}
     if buffered then
         control.timeElapsed = BUFFERTIME
     end
@@ -46,6 +66,11 @@ function controllers.addKeyControl(key, letters, buffered, holdable)
 end
 
 function controllers.checkControl(key)
+    if controls[key].position then
+        if controls[key].active then
+            return controls[key].position
+        end
+    end
     return controls[key].active
 end
 
@@ -53,11 +78,14 @@ function controllers.updateControls(dt)
     for k,control in pairs(controls) do
 
         pressed = false
-        for i,l in ipairs(control.letters) do
-            if love.keyboard.isDown(l) then
+        for i,l in ipairs(control.inputs) do
+            if control.inputFunction(l) then
                 pressed = true
             elseif not control.holdable then
                 control.released = true
+            end
+            if control.position then
+                control.position = {love.mouse.getX(), love.mouse.getY()}
             end
         end
 
@@ -85,6 +113,8 @@ function controllers.updateControls(dt)
         else
             control.active = false
         end
+
+
     end
 end
 
@@ -92,7 +122,7 @@ return controllers
 
 --[[
 A "control" is a table with:
- "letters" - an array of keyboard characters that can be used as input
+ "inputs" - an array of keyboard characters that can be used as input
  "buffered" - a boolean, to see if the key should wait between checking input
  "holdable" - a boolean, to see if the key should wait to be released to be pressed again
  "active" - whether or not the control was active on the last program update

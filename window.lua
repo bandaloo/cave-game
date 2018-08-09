@@ -178,8 +178,8 @@ function window.boardToWorldCoordinates(gridX, gridY)
 end
 
 function window.worldToGridCoordinates(worldX, worldY)
-    return (gridX + window.lookingAt[1]) / window.zoomRatio,
-            (gridY + window.lookingAt[2]) / window.zoomRatio
+    return math.floor((worldX + window.lookingAt[1]) / window.zoomRatio),
+            math.floor((worldY + window.lookingAt[2]) / window.zoomRatio)
 end
 
 return window

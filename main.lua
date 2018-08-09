@@ -71,6 +71,23 @@ function love.update(dt)
         resetGame()
     end
 
+    pos = controllers.checkControl("click")
+    if pos then
+        local gridX, gridY = w.worldToGridCoordinates(pos[1], pos[2])
+        board[gridX][gridY] = 0
+        for k,v in pairs(blocks) do
+            v.body:destroy()
+        end
+        fillWorld(board)
+
+        -- if blocks[gridX .. "," .. gridY] ~= nil then
+        --     blocks[gridX .. "," .. gridY].body:destroy()
+        --     blocks[gridX .. "," .. gridY] = nil
+        --     fillWorld(board)
+        -- end
+
+    end
+
     if controllers.checkControl("removeWallCollision") then
         for k,v in pairs(blocks) do
             v.body:destroy()
@@ -78,12 +95,6 @@ function love.update(dt)
     end
   edt = total
   rdt = TIMESTEP - tdt
-end
-
-function deleteWalls()
-    for i,v in ipairs(blocks) do
-
-    end
 end
 
 function resetGame()
@@ -107,14 +118,14 @@ function love.draw(dt)
     object:draw()
   end
   love.graphics.printf(updatesPerFrame, 0, 0, 200, 'left')
-  -- love.graphics.printf(testx, 0, 100, 200, 'left')
-  -- love.graphics.printf(testy, 0, 200, 200, 'left')
 end
 
 function drawBoard(board)
   love.graphics.setColor(0.1, 0.1, 0.1)
   for i = 0, boardWidth - 1 do
     for j = 0, boardHeight - 1 do
+        if i == 7 and j == 1 then
+        end
       if board[i][j] == 1 then
         drawX, drawY = w.boardToWorldCoordinates(i, j)
         love.graphics.rectangle('fill', drawX - 4 * w.zoomRatio/defaultZoomRatio,
@@ -137,15 +148,22 @@ function drawBoard(board)
 end
 
 function fillWorld(board)
+  blocks = {}
   for i = 0, boardWidth - 1 do
     for j = 0, boardHeight - 1 do
       if board[i][j] == 1 then
         if g.countNeighbors(i,j,board, {{1, 0},{0, 1},{-1, 0},{0, -1}}) < 4 then
+            if i < 8 and j < 2 then
+            end
             local block = {}
             block.body = love.physics.newBody(world, i * SQUARESIZE + SQUARESIZE / 2, j * SQUARESIZE + SQUARESIZE / 2)
             block.shape = love.physics.newRectangleShape(0, 0, SQUARESIZE, SQUARESIZE)
             block.fixture = love.physics.newFixture(block.body, block.shape);
             blocks[i .. "," .. j] = block
+        else
+            if blocks[i .. "," .. j] then
+                blocks[i .. "," .. j].body:destroy()
+            end
         end
       end
     end
