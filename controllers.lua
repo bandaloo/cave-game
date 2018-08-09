@@ -24,13 +24,10 @@ end
 
 function controllers.updateControls(dt)
     for k,control in pairs(controls) do
-        print("key: ", k)
 
         pressed = false
         for i,l in ipairs(control.letters) do
-            print(l)
             if love.keyboard.isDown(l) then
-                print("down")
                 pressed = true
             elseif not control.holdable then
                 control.released = true
@@ -57,10 +54,8 @@ function controllers.updateControls(dt)
         end
 
         if pressed then
-            print("true!")
             control.active = true
         else
-            print("false")
             control.active = false
         end
     end

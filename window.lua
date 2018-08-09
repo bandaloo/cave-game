@@ -18,12 +18,13 @@ function window.setControls()
     controllers.addControl("panDown", {"k"}, false, true)
     controllers.addControl("panRight", {"l"}, false, true)
 
-    controllers.addControl("zoomIn", {"i"}, false, true)
-    controllers.addControl("zoomOut", {"j"}, false, true)
+    controllers.addControl("zoomIn", {"."}, false, true)
+    controllers.addControl("zoomOut", {"/"}, false, true)
 
     controllers.addControl("nextFocusedObject", {"]"}, false, false)
     controllers.addControl("prevFocusedObject", {"["}, false, false)
     controllers.addControl("freeCamera", {"\\"}, false, false)
+    controllers.addControl("resetCamera", {"\'"}, false, false)
 end
 
 function window.updateCamera(objects)
@@ -84,10 +85,13 @@ end
 
 function zoomCamera()
     oldZoom = window.zoomRatio
-    if love.keyboard.isDown(".") then
+    if controllers.checkControl("resetCamera") then
+        window.zoomRatio = window.minZoomRatio
+    end
+    if controllers.checkControl("zoomOut") then
         window.zoomRatio = window.zoomRatio - window.zoomSpeed
     end
-    if love.keyboard.isDown("/") then
+    if controllers.checkControl("zoomIn") then
         window.zoomRatio = window.zoomRatio + window.zoomSpeed
     end
 
@@ -106,16 +110,16 @@ end
 function panCamera()
     dx = 0
     dy = 0
-    if love.keyboard.isDown("j") then
+    if controllers.checkControl("panLeft") then
         dx = dx - window.panSpeed
     end
-    if love.keyboard.isDown("l") then
+    if controllers.checkControl("panRight") then
         dx = dx + window.panSpeed
     end
-    if love.keyboard.isDown("i") then
+    if controllers.checkControl("panUp") then
         dy = dy - window.panSpeed
     end
-    if love.keyboard.isDown("k") then
+    if controllers.checkControl("panDown") then
         dy = dy + window.panSpeed
     end
 
