@@ -31,9 +31,8 @@ function love.load(arg)
   love.graphics.setBackgroundColor(255, 255, 255)
   board = g.generate(boardWidth, boardHeight, 0.35, 100, 'alive')
   fillWorld(board)
-  controllers.addControl("resetGame", {"r"}, true, true)
   w.setBounds(boardWidth, boardHeight, SQUARESIZE)
-  w.setControls()
+  controllers.setupControls()
 end
 
 function love.update(dt)
@@ -71,8 +70,19 @@ function love.update(dt)
         resetGame()
     end
 
+    if controllers.checkControl("removeWallCollision") then
+        for k,v in pairs(blocks) do
+            v.body:destroy()
+        end
+    end
   edt = total
   rdt = TIMESTEP - tdt
+end
+
+function deleteWalls()
+    for i,v in ipairs(blocks) do
+
+    end
 end
 
 function resetGame()
@@ -127,11 +137,13 @@ function fillWorld(board)
   for i = 0, boardWidth - 1 do
     for j = 0, boardHeight - 1 do
       if board[i][j] == 1 then
-        local block = {}
-        block.body = love.physics.newBody(world, i * SQUARESIZE + SQUARESIZE / 2, j * SQUARESIZE + SQUARESIZE / 2)
-        block.shape = love.physics.newRectangleShape(0, 0, SQUARESIZE, SQUARESIZE)
-        block.fixture = love.physics.newFixture(block.body, block.shape);
-        table.insert(blocks, block)
+        if g.countNeighbors(i,j,board, {{1, 0},{0, 1},{-1, 0},{0, -1}}) < 4 then
+            local block = {}
+            block.body = love.physics.newBody(world, i * SQUARESIZE + SQUARESIZE / 2, j * SQUARESIZE + SQUARESIZE / 2)
+            block.shape = love.physics.newRectangleShape(0, 0, SQUARESIZE, SQUARESIZE)
+            block.fixture = love.physics.newFixture(block.body, block.shape);
+            blocks[i .. "," .. j] = block
+        end
       end
     end
   end

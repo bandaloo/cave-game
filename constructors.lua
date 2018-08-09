@@ -26,10 +26,6 @@ function constructors.newEnemyBasic(x, y)
 end
 
 function constructors.newPlayer(x, y)
-controllers.addControl("playerUp", {"up","w"}, false, true)
-controllers.addControl("playerLeft", {"left","a"}, false, true)
-controllers.addControl("playerDown", {"down","s"}, false, true)
-controllers.addControl("playerRight", {"right","d"}, false, true)
   local player = {}
   player.color = {1, 0, 0}
   player.body = love.physics.newBody(world, x, y, 'dynamic')

@@ -42,10 +42,13 @@ function checkBoard(x, y, board)
   return board[x][y]
 end
 
-function countNeighbors(x, y, board)
+function generator.countNeighbors(x, y, board, directions)
+  if directions == nil then
+      directions = dirs
+  end
   count = 0
-  for i = 1, 8 do
-    count = count + checkBoard(x + dirs[i][1], y + dirs[i][2], board)
+  for i = 1, #directions do
+    count = count + checkBoard(x + directions[i][1], y + directions[i][2], board)
   end
   return count
 end
@@ -53,7 +56,7 @@ end
 function stepBoard(oldBoard, newBoard)
   for i = 0, boardWidth - 1 do
     for j = 0, boardHeight - 1 do
-      count = countNeighbors(i, j, oldBoard)
+      count = generator.countNeighbors(i, j, oldBoard)
       result = rules[count + 1]
       if result == BIRTH then
         newBoard[i][j] = 1

@@ -3,7 +3,34 @@ controllers = {}
 controls = {} --The results are stored here, by key
 
 BUFFERTIME = .25
-function controllers.addControl(key, letters, buffered, holdable)
+
+function controllers.setupControls()
+    --camera controls
+    controllers.addKeyControl("panUp", {"i"}, false, true)
+    controllers.addKeyControl("panLeft", {"j"}, false, true)
+    controllers.addKeyControl("panDown", {"k"}, false, true)
+    controllers.addKeyControl("panRight", {"l"}, false, true)
+
+    controllers.addKeyControl("zoomIn", {"."}, false, true)
+    controllers.addKeyControl("zoomOut", {"/"}, false, true)
+
+    controllers.addKeyControl("nextFocusedObject", {"]"}, false, false)
+    controllers.addKeyControl("prevFocusedObject", {"["}, false, false)
+    controllers.addKeyControl("freeCamera", {"\\"}, false, false)
+    controllers.addKeyControl("resetCamera", {"\'"}, false, false)
+
+    --player controls
+    controllers.addKeyControl("playerUp", {"up","w"}, false, true)
+    controllers.addKeyControl("playerLeft", {"left","a"}, false, true)
+    controllers.addKeyControl("playerDown", {"down","s"}, false, true)
+    controllers.addKeyControl("playerRight", {"right","d"}, false, true)
+
+    --Debug controls
+    controllers.addKeyControl("resetGame", {"r"}, true, true)
+    controllers.addKeyControl("removeWallCollision", {"v"}, false, false)
+end
+
+function controllers.addKeyControl(key, letters, buffered, holdable)
     control = {}
     control.letters = letters
     control.buffered = buffered

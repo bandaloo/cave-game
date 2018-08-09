@@ -12,21 +12,6 @@ window.freeMode = true
 local gridBounds = {0,0}
 local cameraMoveSpeed = zoomRatio
 
-function window.setControls()
-    controllers.addControl("panUp", {"i"}, false, true)
-    controllers.addControl("panLeft", {"j"}, false, true)
-    controllers.addControl("panDown", {"k"}, false, true)
-    controllers.addControl("panRight", {"l"}, false, true)
-
-    controllers.addControl("zoomIn", {"."}, false, true)
-    controllers.addControl("zoomOut", {"/"}, false, true)
-
-    controllers.addControl("nextFocusedObject", {"]"}, false, false)
-    controllers.addControl("prevFocusedObject", {"["}, false, false)
-    controllers.addControl("freeCamera", {"\\"}, false, false)
-    controllers.addControl("resetCamera", {"\'"}, false, false)
-end
-
 function window.updateCamera(objects)
     if controllers.checkControl("prevFocusedObject") then
         if window.freeMode then
