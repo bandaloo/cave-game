@@ -94,7 +94,7 @@ return controllers
 A "control" is a table with:
  "letters" - an array of keyboard characters that can be used as input
  "buffered" - a boolean, to see if the key should wait between checking input
- "holdable" - a boolaen, to see if the key should wait to be released to be pressed again
+ "holdable" - a boolean, to see if the key should wait to be released to be pressed again
  "active" - whether or not the control was active on the last program update
  the key should be veguely descriptive
 ]]

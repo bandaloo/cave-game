@@ -37,17 +37,20 @@ function constructors.newPlayer(x, y)
   player.body:setLinearDamping(10)
   player.behaviors = {
     function(self)
-      -- TODO make this directional
+      local moveVecX = 0
+      local moveVecY = 0
       if controls.checkControl("playerRight") then
-        self.body:applyForce(1500, 0)
-    elseif controls.checkControl("playerLeft") then
-        self.body:applyForce(-1500, 0)
+        moveVecX = 1
+      elseif controls.checkControl("playerLeft") then
+        moveVecX = -1
       end
       if controls.checkControl("playerUp") then
-        self.body:applyForce(0, -1500)
-    elseif controls.checkControl("playerDown") then
-        self.body:applyForce(0, 1500)
+        moveVecY = -1
+      elseif controls.checkControl("playerDown") then
+        moveVecY = 1
       end
+      moveVecX, moveVecY = h.normalizeThenScale(moveVecX, moveVecY, 1500)
+      self.body:applyForce(moveVecX, moveVecY)
     end
   }
   player.draw = function(self) d.outlinedcircle(self.body:getX(), self.body:getY(), self.shape:getRadius(), 4, player.color) end

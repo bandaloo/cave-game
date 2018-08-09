@@ -2,6 +2,7 @@ local g = require "generator"
 local c = require "constructors"
 local controllers = require "controllers"
 local w = require "window"
+local h = require "helpers"
 
 SQUARESIZE = 12.8
 MINDT = 0.001
@@ -106,6 +107,8 @@ function love.draw(dt)
     object:draw()
   end
   love.graphics.printf(updatesPerFrame, 0, 0, 200, 'left')
+  -- love.graphics.printf(testx, 0, 100, 200, 'left')
+  -- love.graphics.printf(testy, 0, 200, 200, 'left')
 end
 
 function drawBoard(board)

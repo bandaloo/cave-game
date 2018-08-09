@@ -9,6 +9,9 @@ function helpers.distsquared(x1, y1, x2, y2)
 end
 
 function helpers.normalize(x, y)
+  if x == 0 and y == 0 then
+    return 0, 0
+  end
   local magnitude = helpers.distance(0, 0, x, y);
   return x / magnitude, y / magnitude
 end
