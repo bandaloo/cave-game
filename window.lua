@@ -3,7 +3,7 @@ local window = {}
 
 window.lookingAt = {0,0}
 window.panSpeed = 2
-window.zoomRatio = 0 --how many pixels a grid "Block" should be
+window.zoomRatio = 10 --how many pixels a grid "Block" should be
 defaultZoomRatio = 0
 window.maxZoomRatio = 40
 window.zoomSpeed = .1
@@ -180,6 +180,12 @@ end
 function window.worldToGridCoordinates(worldX, worldY)
     return math.floor((worldX + window.lookingAt[1]) / window.zoomRatio),
             math.floor((worldY + window.lookingAt[2]) / window.zoomRatio)
+end
+
+function window.screenToWorldCoordinates(screenX, screenY)
+  local scale = window.zoomRatio / defaultZoomRatio
+  return (screenX + window.lookingAt[1]) / scale,
+          (screenY + window.lookingAt[2]) / scale
 end
 
 return window

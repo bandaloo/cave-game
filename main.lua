@@ -3,6 +3,7 @@ local c = require "constructors"
 local controllers = require "controllers"
 local w = require "window"
 local h = require "helpers"
+local d = require "drawer"
 
 SQUARESIZE = 12.8
 MINDT = 0.001
@@ -28,20 +29,28 @@ blocks = {}
 table.insert(objects, enemy)
 table.insert(objects, player)
 
+-- TODO come back to this
+-- spawnSensor = {}
+-- spawnSensor.body = love.physics.newBody(world, x, y, 'dynamic')
+-- spawnSensor.shape = love.physics.newCircleShape(15)
+-- spawnSensor.fixture = love.physics.newFixture(spawnSensor.body, spawnSensor.shape, 2.5)
+
+
 function love.load(arg)
   love.graphics.setBackgroundColor(255, 255, 255)
   board = g.generate(boardWidth, boardHeight, 0.35, 100, 'alive')
   fillWorld(board)
   w.setBounds(boardWidth, boardHeight, SQUARESIZE)
   controllers.setupControls()
+  world:setCallbacks(beginContact)
 end
 
 function love.update(dt)
-    controllers.updateControls(dt)
+  controllers.updateControls(dt)
 	local total = dt
-    updatesPerFrame = 0
-    local tdt
-    local completedStep -- this is true when a full step has been completed
+  updatesPerFrame = 0
+  local tdt
+    --completedStep -- this is true when a full step has been completed
 	while total > MINDT do
     completedStep = false
     if rdt ~= 0 then
@@ -66,33 +75,33 @@ function love.update(dt)
     world:update(tdt)
     updatesPerFrame = updatesPerFrame + 1
 	end
-    w.updateCamera(objects)
-    if controllers.checkControl("resetGame") then --Regenerate the grid
-        resetGame()
-    end
+  w.updateCamera(objects)
+  if controllers.checkControl("resetGame") then --Regenerate the grid
+      resetGame()
+  end
 
-    pos = controllers.checkControl("click")
-    if pos then
-        local gridX, gridY = w.worldToGridCoordinates(pos[1], pos[2])
-        board[gridX][gridY] = 0
-        for k,v in pairs(blocks) do
-            v.body:destroy()
-        end
-        fillWorld(board)
+  pos = controllers.checkControl("click")
+  if pos then
+      local gridX, gridY = w.worldToGridCoordinates(pos[1], pos[2])
+      board[gridX][gridY] = 0
+      for k,v in pairs(blocks) do
+          v.body:destroy()
+      end
+      fillWorld(board)
 
-        -- if blocks[gridX .. "," .. gridY] ~= nil then
-        --     blocks[gridX .. "," .. gridY].body:destroy()
-        --     blocks[gridX .. "," .. gridY] = nil
-        --     fillWorld(board)
-        -- end
+      -- if blocks[gridX .. "," .. gridY] ~= nil then
+      --     blocks[gridX .. "," .. gridY].body:destroy()
+      --     blocks[gridX .. "," .. gridY] = nil
+      --     fillWorld(board)
+      -- end
 
-    end
+  end
 
-    if controllers.checkControl("removeWallCollision") then
-        for k,v in pairs(blocks) do
-            v.body:destroy()
-        end
-    end
+  if controllers.checkControl("removeWallCollision") then
+      for k,v in pairs(blocks) do
+          v.body:destroy()
+      end
+  end
   edt = total
   rdt = TIMESTEP - tdt
 end
@@ -165,6 +174,27 @@ function fillWorld(board)
                 blocks[i .. "," .. j].body:destroy()
             end
         end
+      end
+    end
+  end
+end
+
+function beginContact(fixture1, fixture2, coll)
+  -- this is a flip flop so figure out a better way to do this
+  testText = "TEST"
+  local object1 = fixture1:getUserData() -- make this compatible with sensors
+  local object2 = fixture2:getUserData()
+  if object1 ~= nil and object2 ~= nil then
+    if object1.collisions[object2.entityType] ~= nil then
+      for i, func in ipairs(object1.collisions[object2.entityType]) do
+        -- currentKey = i
+        func(object1, object2)
+      end
+    end
+    if object2.collisions[object1.entityType] ~= nil then
+      for i, func in ipairs(object2.collisions[object1.entityType]) do
+        -- currentKey = i
+        func(object2, object1)
       end
     end
   end
