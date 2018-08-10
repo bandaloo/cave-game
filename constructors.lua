@@ -74,6 +74,8 @@ function constructors.newPlayer(x, y)
       if self.shotTick == 0 then
         local bullet = constructors.newBullet(bulletX, bulletY)
         bullet.body:setLinearVelocity(shotX * 400, shotY * 400)
+        bullet.fixture:setSensor(true)
+        -- local isSensor = bullet.fixture:isSensor()
         table.insert(objects, bullet)
       end
     end
@@ -107,6 +109,7 @@ function constructors.newBullet(x, y)
   bullet.destroy = b.bulletDestroy
   bullet.collisions = {enemy = {}}
   bullet.fixture:setUserData(bullet)
+  --bullet.pending = true
   return bullet
 end
 

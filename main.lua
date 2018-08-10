@@ -13,7 +13,7 @@ local boardHeight = 56
 
 local edt = 0 -- extra delta time, for preventing very small timestep
 local rdt = 0 -- remainder delta time, for keeping a constant time step
-
+testText = "test"
 -- temporary seed for testing
 love.math.setRandomSeed(0)
 
@@ -66,10 +66,23 @@ function love.update(dt)
     end
 		total = total - tdt
     for key, object in pairs(objects) do
+      if not object.pending then
+        object.pending = true
+      else
+        object.fixture:setSensor(false) -- might move this up
+      end
       if object.behaviors ~= nil then
         for i, func in ipairs(object.behaviors) do
           func(object)
         end
+      end
+      if object.health <= 0 or (object.lifetime ~= nil and object.lifetime < 0) then
+        object.destroy(object)
+        object.body:destroy()
+        objects[key] = nil
+      end
+      if object.lifetime ~= nil then
+        object.lifetime = object.lifetime - dt
       end
     end
     world:update(tdt)
@@ -127,6 +140,7 @@ function love.draw(dt)
     object:draw()
   end
   love.graphics.printf(updatesPerFrame, 0, 0, 200, 'left')
+  love.graphics.printf(testText, 0, 0, 200, 'left')
 end
 
 function drawBoard(board)
@@ -180,22 +194,32 @@ function fillWorld(board)
 end
 
 function beginContact(fixture1, fixture2, coll)
-  -- this is a flip flop so figure out a better way to do this
-  testText = "TEST"
+  -- this is repetitive so figure out a better way to do this
   local object1 = fixture1:getUserData() -- make this compatible with sensors
   local object2 = fixture2:getUserData()
+  sensorCheck(object1)
+  sensorCheck(object2)
   if object1 ~= nil and object2 ~= nil then
-    if object1.collisions[object2.entityType] ~= nil then
-      for i, func in ipairs(object1.collisions[object2.entityType]) do
-        -- currentKey = i
-        func(object1, object2)
-      end
+    collide(object1, object2)
+    collide(object2, object1)
+  end
+end
+
+function collide(object1, object2)
+  if object1.collisions[object2.entityType] ~= nil then
+    for i, func in ipairs(object1.collisions[object2.entityType]) do
+      -- currentKey = i
+      func(object1, object2)
     end
-    if object2.collisions[object1.entityType] ~= nil then
-      for i, func in ipairs(object2.collisions[object1.entityType]) do
-        -- currentKey = i
-        func(object2, object1)
-      end
+  end
+end
+
+function sensorCheck(object)
+  if object ~= nil then
+    if object.fixture:isSensor() then
+      testText = "sensor collided"
+      object.health = -1
+      return
     end
   end
 end
