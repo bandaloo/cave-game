@@ -75,8 +75,9 @@ function constructors.newPlayer(x, y)
         local bullet = constructors.newBullet(bulletX, bulletY)
         bullet.body:setLinearVelocity(shotX * 400, shotY * 400)
         bullet.fixture:setSensor(true)
-        -- local isSensor = bullet.fixture:isSensor()
         table.insert(objects, bullet)
+        -- in order to spawn an object that disappears if there is no room, set
+        -- pending to false and make it a sensor
       end
     end
   }
@@ -109,7 +110,7 @@ function constructors.newBullet(x, y)
   bullet.destroy = b.bulletDestroy
   bullet.collisions = {enemy = {}}
   bullet.fixture:setUserData(bullet)
-  --bullet.pending = true
+  bullet.pending = false -- name of pending should probably be changed
   return bullet
 end
 

@@ -90,7 +90,7 @@ function love.update(dt)
 	end
   w.updateCamera(objects)
   if controllers.checkControl("resetGame") then --Regenerate the grid
-      resetGame()
+    resetGame()
   end
 
   pos = controllers.checkControl("click")
@@ -120,18 +120,18 @@ function love.update(dt)
 end
 
 function resetGame()
-    world = love.physics.newWorld(0, 0, false)
-    objects = {}
-    player = c.newPlayer(100, 100)
-    nearestPlayer = player
-    enemy = c.newEnemyBasic(200, 200)
-    blocks = {}
+  world = love.physics.newWorld(0, 0, false)
+  objects = {}
+  player = c.newPlayer(100, 100)
+  nearestPlayer = player
+  enemy = c.newEnemyBasic(200, 200)
+  blocks = {}
 
-    table.insert(objects, enemy)
-    table.insert(objects, player)
+  table.insert(objects, enemy)
+  table.insert(objects, player)
 
-    board = g.generate(boardWidth, boardHeight, 0.35, 100, 'alive')
-    fillWorld(board)
+  board = g.generate(boardWidth, boardHeight, 0.35, 100, 'alive')
+  fillWorld(board)
 end
 
 function love.draw(dt)
@@ -176,17 +176,15 @@ function fillWorld(board)
     for j = 0, boardHeight - 1 do
       if board[i][j] == 1 then
         if g.countNeighbors(i,j,board, {{1, 0},{0, 1},{-1, 0},{0, -1}}) < 4 then
-            if i < 8 and j < 2 then
-            end
-            local block = {}
-            block.body = love.physics.newBody(world, i * SQUARESIZE + SQUARESIZE / 2, j * SQUARESIZE + SQUARESIZE / 2)
-            block.shape = love.physics.newRectangleShape(0, 0, SQUARESIZE, SQUARESIZE)
-            block.fixture = love.physics.newFixture(block.body, block.shape);
-            blocks[i .. "," .. j] = block
+          local block = {}
+          block.body = love.physics.newBody(world, i * SQUARESIZE + SQUARESIZE / 2, j * SQUARESIZE + SQUARESIZE / 2)
+          block.shape = love.physics.newRectangleShape(0, 0, SQUARESIZE, SQUARESIZE)
+          block.fixture = love.physics.newFixture(block.body, block.shape);
+          blocks[i .. "," .. j] = block
         else
-            if blocks[i .. "," .. j] then
-                blocks[i .. "," .. j].body:destroy()
-            end
+          if blocks[i .. "," .. j] then
+            blocks[i .. "," .. j].body:destroy()
+          end
         end
       end
     end
